@@ -6,6 +6,7 @@
     "commit": "dist/bin.js"
   },
   "scripts": {
+    "commit": "git-cz",
     "start": "template start",
     "init": "template init",
     "test": "template test",
@@ -42,6 +43,7 @@
     "jsdoc": "3.5.5"
   },
   "dependencies": {
-    "@cajacko/template": "https://github.com/cajacko/template.git#v0.12.0"
+    "@cajacko/template": "https://github.com/cajacko/template.git#v0.12.0",
+    "commitizen": "^2.10.1"
   }
 }
