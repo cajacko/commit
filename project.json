@@ -1,0 +1,19 @@
+{
+  "title": "Commit",
+  "slug": "@cajacko/commit",
+  "version": "0.1.0",
+  "description": "Git Commit CLI with Flexible Templates.",
+  "authorName": "Charlie Jackson",
+  "authorUrl": "https://charliejackson.com",
+  "authorEmail": "contact@charliejackson.com",
+  "license": "MIT",
+  "templates": {
+    "main-package": {
+      "type": "npm-module",
+      "bin": {
+        "commit": "dist/bin.js"
+      }
+    }
+  },
+  "templateInitVersion": "0.9.0"
+}
