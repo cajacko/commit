@@ -42,7 +42,7 @@
     "jsdoc": "3.5.5"
   },
   "dependencies": {
-    "@cajacko/lib": "https://github.com/cajacko/lib.git#v3.2.0",
+    "@cajacko/lib": "https://github.com/cajacko/lib.git#v3.3.0",
     "@cajacko/template": "https://github.com/cajacko/template.git#v0.9.0"
   }
 }
