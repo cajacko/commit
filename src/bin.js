@@ -27,9 +27,10 @@ const getDetails = () =>
       choices: ['bug', 'feat', 'feat'],
       scope: ['withHOC', null, 'NewsCards'],
     },
+    lastUsedTags: ['#123', '#234', '#345'],
   });
 
-getDetails().then(({ prevResponses }) => {
+getDetails().then(({ prevResponses, branch, lastUsedTags }) => {
   const descriptionDefault =
     "# Don't save changes to prevent this file getting adding\n# Why is this change needed?\nPrior to this change, \n\n# How does it address the issue?\nThis change";
 
@@ -83,7 +84,7 @@ getDetails().then(({ prevResponses }) => {
       }
 
       if (firstLine !== '') {
-        firstLine = `${firstLine}:`;
+        firstLine = `${firstLine}: `;
       }
 
       const maxFirstLineLength = 100;
@@ -133,20 +134,110 @@ getDetails().then(({ prevResponses }) => {
                   first = false;
                   final = line;
                 } else {
-                  final = `${final}\n${line}`;
+                  final = `${final}\n`;
+
+                  if (trim(line) !== '') {
+                    final = `${final}${line}`;
+                  }
                 }
               });
 
-              return final;
+              return trim(final);
             },
           },
         ])
         .then(({ title, body }) => {
           firstLine = `${firstLine}${title}`;
-          // Refs - Loop over - remember prev jira issue?
-          const getRefs = () => Promise.resolve([]);
 
-          return getRefs().then(refs =>
+          const refs = [
+            {
+              key: 'Original Branch',
+              value: branch,
+            },
+          ];
+
+          /**
+           *
+           */
+          const getRefs = () =>
+            inquirer
+              .prompt([
+                {
+                  type: 'autocomplete',
+                  name: 'key',
+                  suggestOnly: true,
+                  source: (answers, input) =>
+                    Promise.resolve(fuzzy
+                      .filter(input || '', ['Fixes', 'Related To'])
+                      .map(({ original }) => original)),
+                  message:
+                    'References: Add a key (return nothing to continue)\n-',
+                  filter: trim,
+                },
+              ])
+              .then(({ key }) => {
+                if (!key || key === '') return Promise.resolve();
+
+                /**
+                 *
+                 */
+                const promise = () => {
+                  if (key === 'Fixes' || 'Related To') {
+                    return inquirer.prompt([
+                      {
+                        type: 'autocomplete',
+                        name: 'value',
+                        suggestOnly: true,
+                        source: (answers, input) => {
+                          const text = trim(input || '');
+
+                          const issues = lastUsedTags
+                            .filter(tag =>
+                              !text
+                                .split(' ')
+                                .some(textTag => textTag === tag))
+                            .reverse()
+                            .map((tag) => {
+                              if (text === '') return tag;
+                              const textTags = input.split(' ');
+                              if (textTags.length === 1) return tag;
+
+                              textTags.pop();
+
+                              return trim(`${textTags.reduce(
+                                (a, b) => `${a} ${b}`,
+                                ''
+                              )} ${tag}`);
+                            });
+
+                          return Promise.resolve(issues.filter(issue => issue.startsWith(text)));
+                        },
+                        message: `References: Add a value for ${key}\n-`,
+                        filter: trim,
+                      },
+                    ]);
+                  }
+
+                  return inquirer.prompt([
+                    {
+                      type: 'input',
+                      name: 'value',
+                      message: `References: Add a value for ${key}\n-`,
+                      filter: trim,
+                    },
+                  ]);
+                };
+
+                return promise().then(({ value }) => {
+                  if (!value || value === '') return getRefs();
+
+                  refs.push({ key, value });
+
+                  return getRefs();
+                });
+              });
+
+          return getRefs().then(() =>
             inquirer
               .prompt([
                 {
@@ -168,15 +259,25 @@ getDetails().then(({ prevResponses }) => {
                 },
               ])
               .then(({ emoji }) => {
-                let gitMessage = `${firstLine}\n\n`;
+                let gitMessage = `${firstLine}`;
 
                 if (emoji) {
                   gitMessage = `${emoji} ${gitMessage}`;
                 }
 
                 if (body) {
-                  gitMessage = `${gitMessage}${body}\n\n`;
+                  gitMessage = `${gitMessage}\n\n${body}`;
                 }
+
+                if (refs.length) {
+                  gitMessage = `${gitMessage}\n\nReferences:`;
+
+                  refs.forEach(({ key, value }) => {
+                    gitMessage = `${gitMessage}\n- ${key}: ${value}`;
+                  });
+                }
+
+                gitMessage = gitMessage.replace('\n\n\n', '\n\n');
 
                 console.log(gitMessage);
               }));
@@ -194,7 +295,9 @@ Prior to this change, ...
 This change...
 
 References
-- Jira: #GEN-254 - https://www....
+- Original Branch: feature/name
+- Fixes: #GEN-254 (only if does fix it)
+- Related: #GEN-254 #123
 - Key: Value
 
 
