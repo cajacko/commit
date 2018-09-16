@@ -23,21 +23,30 @@ const getDetails = () =>
   Promise.resolve({
     branch: 'feature/GEN-264-somethind-and-another',
     origin: 'https://github.com.git',
-    prevResponses: {
+    prevBranchResponses: {
       choices: ['bug', 'feat', 'feat'],
       scope: ['withHOC', null, 'NewsCards'],
+      relatedTo: ['#456 #567'],
     },
+    lastUsedCustomReferenceKeys: ['Custom'],
     lastUsedTags: ['#123', '#234', '#345'],
   });
 
-getDetails().then(({ prevResponses, branch, lastUsedTags }) => {
+getDetails().then(({
+  prevBranchResponses,
+  branch,
+  lastUsedTags,
+  lastUsedCustomReferenceKeys,
+}) => {
   const descriptionDefault =
-    "# Don't save changes to prevent this file getting adding\n# Why is this change needed?\nPrior to this change, \n\n# How does it address the issue?\nThis change";
+      "# Don't save changes to prevent this file getting adding\n# Why is this change needed?\nPrior to this change, \n\n# How does it address the issue?\nThis change";
 
   let scopeSuggestions = [];
 
-  if (prevResponses.scope && prevResponses.scope.length) {
-    scopeSuggestions = prevResponses.scope.filter(val => !!val).reverse();
+  if (prevBranchResponses.scope && prevBranchResponses.scope.length) {
+    scopeSuggestions = prevBranchResponses.scope
+      .filter(val => !!val)
+      .reverse();
   }
 
   return inquirer
@@ -68,7 +77,7 @@ getDetails().then(({ prevResponses, branch, lastUsedTags }) => {
             .filter(input || '', scopeSuggestions)
             .map(({ original }) => original)),
         message:
-          'What is the scope of this change (e.g. component or file name)?\n-',
+            'What is the scope of this change (e.g. component or file name)?\n-',
         filter: trim,
       },
     ])
@@ -84,13 +93,13 @@ getDetails().then(({ prevResponses, branch, lastUsedTags }) => {
       }
 
       if (firstLine !== '') {
-        firstLine = `${firstLine}: `;
+        firstLine = `${firstLine}} `;
       }
 
       const maxFirstLineLength = 100;
       const emojiAllowance = 2;
       const lengthLeftForTitle =
-        maxFirstLineLength - emojiAllowance - firstLine.length;
+          maxFirstLineLength - emojiAllowance - firstLine.length;
 
       return inquirer
         .prompt([
@@ -156,9 +165,9 @@ getDetails().then(({ prevResponses, branch, lastUsedTags }) => {
             },
           ];
 
-          /**
-           *
-           */
+            /**
+             *
+             */
           const getRefs = () =>
             inquirer
               .prompt([
@@ -168,10 +177,13 @@ getDetails().then(({ prevResponses, branch, lastUsedTags }) => {
                   suggestOnly: true,
                   source: (answers, input) =>
                     Promise.resolve(fuzzy
-                      .filter(input || '', ['Fixes', 'Related To'])
+                      .filter(
+                        input || '',
+                        ['Fixes', 'Related To'].concat(lastUsedCustomReferenceKeys.reverse())
+                      )
                       .map(({ original }) => original)),
                   message:
-                    'References: Add a key (return nothing to continue)\n-',
+                      'References: Add a key (return nothing to continue)\n-',
                   filter: trim,
                 },
               ])
@@ -179,8 +191,8 @@ getDetails().then(({ prevResponses, branch, lastUsedTags }) => {
                 if (!key || key === '') return Promise.resolve();
 
                 /**
-                 *
-                 */
+                   *
+                   */
                 const promise = () => {
                   if (key === 'Fixes' || 'Related To') {
                     return inquirer.prompt([
@@ -210,10 +222,22 @@ getDetails().then(({ prevResponses, branch, lastUsedTags }) => {
                               )} ${tag}`);
                             });
 
+                          if (key === 'Related To') {
+                            const lastResponse =
+                                prevBranchResponses.relatedTo.length &&
+                                prevBranchResponses.relatedTo[
+                                  prevBranchResponses.relatedTo.length - 1
+                                ];
+
+                            if (lastResponse) {
+                              issues.unshift(`Prev: ${lastResponse}`);
+                            }
+                          }
+
                           return Promise.resolve(issues.filter(issue => issue.startsWith(text)));
                         },
                         message: `References: Add a value for ${key}\n-`,
-                        filter: trim,
+                        filter: text => trim(text).replace('Prev: ', ''),
                       },
                     ]);
                   }
@@ -248,8 +272,47 @@ getDetails().then(({ prevResponses, branch, lastUsedTags }) => {
                     'none',
                     `${
                       emojic.art
-                    } when improving the format/structure of the code`,
-                    `${emojic.racehorse} when improving performance`,
+                    } \`:art:\` when improving the format/structure of the code`,
+                    `${
+                      emojic.racehorse
+                    } \`:racehorse:\` when improving performance`,
+                    `${
+                      emojic.nonPotableWater
+                    } \`:non-potable_water:\` when plugging memory leaks`,
+                    `${emojic.memo} \`:memo:\` when writing docs`,
+                    `${
+                      emojic.globeWithMeridians
+                    } \`:globe_with_meridians:\` When fixing a browser compatibility issue`,
+                    `${
+                      emojic.penguin
+                    } \`:penguin:\` when fixing something on Linux`,
+                    `${
+                      emojic.apple
+                    } \`:apple:\` when fixing something on Mac OS/iOS/Safari`,
+                    `${
+                      emojic.robot
+                    } \`:robot:\` when fixing something on Android`,
+                    `${
+                      emojic.checkeredFlag
+                    } \`:checkered_flag:\` when fixing something on Windows/IE`,
+                    `${emojic.bug} \`:bug:\` when fixing a bug`,
+                    `${emojic.fire} \`:fire:\` when removing code or files`,
+                    `${
+                      emojic.greenHeart
+                    } \`:green_heart:\` when fixing the CI build`,
+                    `${
+                      emojic.whiteCheckMark
+                    } \`:white_check_mark:\` when adding tests`,
+                    `${emojic.lock} \`:lock:\` when dealing with security`,
+                    `${
+                      emojic.arrowUp
+                    } \`:arrow_up:\` when upgrading dependencies`,
+                    `${
+                      emojic.arrowDown
+                    } \`:arrow_down:\` when downgrading dependencies`,
+                    `${
+                      emojic.wrench
+                    } \`:wrench:\` when doing a chore/build tasks`,
                   ],
                   filter: (text) => {
                     if (!text || text === 'none') return null;
@@ -284,67 +347,3 @@ getDetails().then(({ prevResponses, branch, lastUsedTags }) => {
         });
     });
 });
-
-/*
-# If applied, this commit will... (limit)
-
-# Why is this change needed?
-Prior to this change, ...
-
-# How does it address the issue?
-This change...
-
-References
-- Original Branch: feature/name
-- Fixes: #GEN-254 (only if does fix it)
-- Related: #GEN-254 #123
-- Key: Value
-
-
-Title
-Why
-How
-Refs
-
-Originally commited on - Branch
-
-# <type>(<scope>): <subject>
-#
-# <body>
-#
-# <footer>
-#
-# ** TYPES **
-# feat (new feature)
-# fix (bug fix)
-# docs (changes to documentation)
-# style (formatting, missing semi colons, etc; no code change)
-# refactor (refactoring production code)
-# test (adding missing tests, refactoring tests; no production code change)
-# chore (updating grunt tasks etc; no production code change)
-#
-# ** FOOTERS **
-# References #1, #4, and #2.
-# Fix #1. note this marks the item as accepted in Sprintly
-# Closes #1 and #2. note this marks the item as accepted in Sprintly
-
-# ** Funtip **
-# Work hard, play hard!  Consider prefixing your commit messages with a relevant emoji for
-# great good:
-#
-#   :art: `:art:` when improving the format/structure of the code
-#   :racehorse: `:racehorse:` when improving performance
-#   :non-potable_water: `:non-potable_water:` when plugging memory leaks
-#   :memo: `:memo:` when writing docs
-#   :penguin: `:penguin:` when fixing something on Linux
-#   :apple: `:apple:` when fixing something on Mac OS
-#   :checkered_flag: `:checkered_flag:` when fixing something on Windows
-#   :bug: `:bug:` when fixing a bug
-#   :fire: `:fire:` when removing code or files
-#   :green_heart: `:green_heart:` when fixing the CI build
-#   :white_check_mark: `:white_check_mark:` when adding tests
-#   :lock: `:lock:` when dealing with security
-#   :arrow_up: `:arrow_up:` when upgrading dependencies
-#   :arrow_down: `:arrow_down:` when downgrading dependencies
-#   :shirt: `:shirt:` when removing linter warnings
-*/
