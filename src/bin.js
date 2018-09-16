@@ -3,7 +3,7 @@
 // @flow
 
 import inquirer from 'inquirer';
-import { runCommand } from '@cajacko/template';
+import { git } from '@cajacko/template';
 import MaxLengthInputPrompt from 'inquirer-maxlength-input-prompt';
 import AutoComplete from 'inquirer-autocomplete-prompt';
 import getMessage from './message/getMessage';
@@ -16,10 +16,4 @@ inquirer.registerPrompt('autocomplete', AutoComplete);
 // TODO: saveResponses for getMessage, when done
 // TODO: ask for message and then commit with the message
 
-runCommand('git commit -m $1', { vars: { $1: 'Test commit' } });
-
-// getMessage().then((message) => {
-//   console.log(message);
-
-//   runCommand('ls');
-// });
+getMessage().then(message => git.commit(process.cwd(), message, false));
