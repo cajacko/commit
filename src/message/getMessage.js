@@ -17,14 +17,18 @@ const trim = (text) => {
 /**
  *
  */
-const getMessage = ({
-  storeKey,
-  prevBranchResponses,
-  branch,
-  lastUsedTags,
-  lastUsedCustomReferenceKeys,
-  failedMessage,
-}) => {
+const getMessage = (
+  {
+    storeKey,
+    prevBranchResponses,
+    branch,
+    lastUsedTags,
+    lastUsedCustomReferenceKeys,
+    failedMessage,
+  },
+  omitBody,
+  omitRefs
+) => {
   /**
    *
    */
@@ -98,225 +102,234 @@ const getMessage = ({
         const lengthLeftForTitle =
           maxFirstLineLength - emojiAllowance - firstLine.length;
 
-        return inquirer
-          .prompt([
-            {
-              type: 'maxlength-input',
-              name: 'title',
-              message: 'If applied, this commit will...\n-',
-              maxLength: lengthLeftForTitle,
-              validate: (text) => {
-                const filteredText = trim(text);
+        const questions = [
+          {
+            type: 'maxlength-input',
+            name: 'title',
+            message: 'If applied, this commit will...\n-',
+            maxLength: lengthLeftForTitle,
+            validate: (text) => {
+              const filteredText = trim(text);
 
-                if (!filteredText || filteredText === '') {
-                  return 'This is the commit title, it cannot be blank';
-                }
+              if (!filteredText || filteredText === '') {
+                return 'This is the commit title, it cannot be blank';
+              }
 
-                if (filteredText.length > lengthLeftForTitle) {
-                  return `Title length cannot be longer than ${lengthLeftForTitle}. Currently at ${
-                    filteredText.length
-                  }`;
-                }
+              if (filteredText.length > lengthLeftForTitle) {
+                return `Title length cannot be longer than ${lengthLeftForTitle}. Currently at ${
+                  filteredText.length
+                }`;
+              }
 
-                return true;
-              },
-              filter: trim,
+              return true;
             },
-            {
-              type: 'editor',
-              name: 'body',
-              message: 'Add a description to this commit',
-              default: descriptionDefault,
-              filter: (text) => {
-                if (text === descriptionDefault) return null;
+            filter: trim,
+          },
+        ];
 
-                let final = '';
-                let first = true;
+        if (!omitBody) {
+          questions.push({
+            type: 'editor',
+            name: 'body',
+            message: 'Add a description to this commit',
+            default: descriptionDefault,
+            filter: (text) => {
+              if (text === descriptionDefault) return null;
 
-                text.split('\n').forEach((line) => {
-                  if (line.startsWith('#')) return;
+              let final = '';
+              let first = true;
 
-                  if (first) {
-                    first = false;
-                    final = line;
-                  } else {
-                    final = `${final}\n`;
+              text.split('\n').forEach((line) => {
+                if (line.startsWith('#')) return;
 
-                    if (trim(line) !== '') {
-                      final = `${final}${line}`;
-                    }
+                if (first) {
+                  first = false;
+                  final = line;
+                } else {
+                  final = `${final}\n`;
+
+                  if (trim(line) !== '') {
+                    final = `${final}${line}`;
                   }
-                });
+                }
+              });
 
-                return trim(final);
-              },
+              return trim(final);
             },
-          ])
-          .then(({ title, body }) => {
-            firstLine = `${firstLine}${title}`;
+          });
+        }
 
-            const refs = [
-              {
-                key: 'Original Branch',
-                value: branch,
-              },
-            ];
+        return inquirer.prompt(questions).then(({ title, body }) => {
+          firstLine = `${firstLine}${title}`;
 
-            /**
-             *
-             */
-            const getRefs = () =>
-              inquirer
-                .prompt([
-                  {
-                    type: 'autocomplete',
-                    name: 'key',
-                    suggestOnly: true,
-                    source: (answers, input) =>
-                      Promise.resolve(fuzzy
-                        .filter(
-                          input || '',
-                          ['Fixes', 'Related To'].concat(lastUsedCustomReferenceKeys.reverse())
-                        )
-                        .map(({ original }) => original)),
-                    message:
-                      'References: Add a key (return nothing to continue)\n-',
-                    filter: trim,
-                  },
-                ])
-                .then(({ key }) => {
-                  if (!key || key === '') return Promise.resolve();
+          const refs = [
+            {
+              key: 'Original Branch',
+              value: branch,
+            },
+          ];
 
-                  /**
-                   *
-                   */
-                  const promise = () => {
-                    if (key === 'Fixes' || key === 'Related To') {
-                      return inquirer.prompt([
-                        {
-                          type: 'autocomplete',
-                          name: 'value',
-                          suggestOnly: true,
-                          source: (answers, input) => {
-                            const text = trim(input || '');
+          let refPromise = Promise.resolve();
 
-                            const issues = lastUsedTags
-                              .filter(tag =>
-                                !text
-                                  .split(' ')
-                                  .some(textTag => textTag === tag))
-                              .reverse()
-                              .map((tag) => {
-                                if (text === '') return tag;
-                                const textTags = input.split(' ');
-                                if (textTags.length === 1) return tag;
+          /**
+           *
+           */
+          const getRefs = () =>
+            inquirer
+              .prompt([
+                {
+                  type: 'autocomplete',
+                  name: 'key',
+                  suggestOnly: true,
+                  source: (answers, input) =>
+                    Promise.resolve(fuzzy
+                      .filter(
+                        input || '',
+                        ['Fixes', 'Related To'].concat(lastUsedCustomReferenceKeys.reverse())
+                      )
+                      .map(({ original }) => original)),
+                  message:
+                    'References: Add a key (return nothing to continue)\n-',
+                  filter: trim,
+                },
+              ])
+              .then(({ key }) => {
+                if (!key || key === '') return Promise.resolve();
 
-                                textTags.pop();
-
-                                return trim(`${textTags.reduce(
-                                  (a, b) => `${a} ${b}`,
-                                  ''
-                                )} ${tag}`);
-                              });
-
-                            if (key === 'Related To') {
-                              const lastResponse =
-                                prevBranchResponses.relatedTo &&
-                                prevBranchResponses.relatedTo.length &&
-                                prevBranchResponses.relatedTo[
-                                  prevBranchResponses.relatedTo.length - 1
-                                ];
-
-                              if (lastResponse) {
-                                issues.unshift(`Prev: ${lastResponse}`);
-                              }
-                            }
-
-                            return Promise.resolve(issues.filter(issue => issue.startsWith(text)));
-                          },
-                          message: `References: Add a value for ${key}\n-`,
-                          filter: text => trim(text).replace('Prev: ', ''),
-                        },
-                      ]);
-                    }
-
+                /**
+                 *
+                 */
+                const promise = () => {
+                  if (key === 'Fixes' || key === 'Related To') {
                     return inquirer.prompt([
                       {
-                        type: 'input',
+                        type: 'autocomplete',
                         name: 'value',
+                        suggestOnly: true,
+                        source: (answers, input) => {
+                          const text = trim(input || '');
+
+                          const issues = lastUsedTags
+                            .filter(tag =>
+                              !text
+                                .split(' ')
+                                .some(textTag => textTag === tag))
+                            .reverse()
+                            .map((tag) => {
+                              if (text === '') return tag;
+                              const textTags = input.split(' ');
+                              if (textTags.length === 1) return tag;
+
+                              textTags.pop();
+
+                              return trim(`${textTags.reduce(
+                                (a, b) => `${a} ${b}`,
+                                ''
+                              )} ${tag}`);
+                            });
+
+                          if (key === 'Related To') {
+                            const lastResponse =
+                              prevBranchResponses.relatedTo &&
+                              prevBranchResponses.relatedTo.length &&
+                              prevBranchResponses.relatedTo[
+                                prevBranchResponses.relatedTo.length - 1
+                              ];
+
+                            if (lastResponse) {
+                              issues.unshift(`Prev: ${lastResponse}`);
+                            }
+                          }
+
+                          return Promise.resolve(issues.filter(issue => issue.startsWith(text)));
+                        },
                         message: `References: Add a value for ${key}\n-`,
-                        filter: trim,
+                        filter: text => trim(text).replace('Prev: ', ''),
                       },
                     ]);
-                  };
+                  }
 
-                  return promise().then(({ value }) => {
-                    if (!value || value === '') return getRefs();
-
-                    refs.push({ key, value });
-
-                    return getRefs();
-                  });
-                });
-
-            return getRefs().then(() =>
-              inquirer
-                .prompt([
-                  {
-                    type: 'list',
-
-                    name: 'emoji',
-                    choices: ['none'].concat(emojiChoices),
-                    filter: (text) => {
-                      if (!text || text === 'none') return null;
-
-                      return text.split(' ')[0];
+                  return inquirer.prompt([
+                    {
+                      type: 'input',
+                      name: 'value',
+                      message: `References: Add a value for ${key}\n-`,
+                      filter: trim,
                     },
+                  ]);
+                };
+
+                return promise().then(({ value }) => {
+                  if (!value || value === '') return getRefs();
+
+                  refs.push({ key, value });
+
+                  return getRefs();
+                });
+              });
+
+          if (!omitRefs) {
+            refPromise = getRefs();
+          }
+
+          return refPromise.then(() =>
+            inquirer
+              .prompt([
+                {
+                  type: 'list',
+
+                  name: 'emoji',
+                  choices: ['none'].concat(emojiChoices),
+                  filter: (text) => {
+                    if (!text || text === 'none') return null;
+
+                    return text.split(' ')[0];
                   },
-                ])
-                .then(({ emoji }) => {
-                  let gitMessage = `${firstLine}`;
+                },
+              ])
+              .then(({ emoji }) => {
+                let gitMessage = `${firstLine}`;
 
-                  if (emoji) {
-                    gitMessage = `${emoji} ${gitMessage}`;
-                  }
+                if (emoji) {
+                  gitMessage = `${emoji} ${gitMessage}`;
+                }
 
-                  if (body) {
-                    gitMessage = `${gitMessage}\n\n${body}`;
-                  }
+                if (body) {
+                  gitMessage = `${gitMessage}\n\n${body}`;
+                }
 
-                  if (refs.length) {
-                    gitMessage = `${gitMessage}\n\nReferences:`;
+                if (refs.length) {
+                  gitMessage = `${gitMessage}\n\nReferences:`;
 
-                    refs.forEach(({ key, value }) => {
-                      gitMessage = `${gitMessage}\n- ${key}: ${value}`;
+                  refs.forEach(({ key, value }) => {
+                    gitMessage = `${gitMessage}\n- ${key}: ${value}`;
 
-                      if (key === 'Related To' && !relatedTo.includes(value)) {
-                        relatedTo.push(value);
+                    if (key === 'Related To' && !relatedTo.includes(value)) {
+                      relatedTo.push(value);
+                    }
+
+                    if (
+                      key !== 'Related To' &&
+                      key !== 'Fixes' &&
+                      key !== 'Original Branch' &&
+                      !referenceKeys.includes(key)
+                    ) {
+                      referenceKeys.push(key);
+                    }
+
+                    value.split(' ').forEach((tag) => {
+                      if (tag.startsWith('#') && !newTags.includes(tag)) {
+                        newTags.push(tag);
                       }
-
-                      if (
-                        key !== 'Related To' &&
-                        key !== 'Fixes' &&
-                        key !== 'Original Branch' &&
-                        !referenceKeys.includes(key)
-                      ) {
-                        referenceKeys.push(key);
-                      }
-
-                      value.split(' ').forEach((tag) => {
-                        if (tag.startsWith('#') && !newTags.includes(tag)) {
-                          newTags.push(tag);
-                        }
-                      });
                     });
-                  }
+                  });
+                }
 
-                  gitMessage = gitMessage.replace('\n\n\n', '\n\n');
+                gitMessage = gitMessage.replace('\n\n\n', '\n\n');
 
-                  return gitMessage;
-                }));
-          });
+                return gitMessage;
+              }));
+        });
       })
       .then(message =>
         inquirer

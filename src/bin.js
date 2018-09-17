@@ -14,20 +14,23 @@ inquirer.registerPrompt('maxlength-input', MaxLengthInputPrompt);
 inquirer.registerPrompt('autocomplete', AutoComplete);
 
 // TODO: Final confirm is Yne - e is editor, same it confirming previous commit
-// TODO: Can pass flag to do a short commit
 // TODO: Ask if we to do description and open editor right after if true
 // TODO: Reorder all choices based on usage (last used is high, frequently used is high)
 // TODO: "Related to" ordered above "fixes"
 // TODO: Ability to force all commits to run through us
 // TODO: Can enter cutom emoji
+// TODO: How to keep related To between commits, especially short ones
 
 git.hasStagedChanges(process.cwd()).then((hasStagedChanges) => {
+  const omitBody = process.argv.includes('-s');
+  const omitRefs = omitBody;
+
   /**
    *
    */
   const commit = () =>
     getDetails().then(details =>
-      getMessage(details).then((message) => {
+      getMessage(details, omitBody, omitRefs).then((message) => {
         if (!message) return Promise.resolve();
 
         const { storeKey } = details;
