@@ -13,9 +13,7 @@ import { set, remove } from './utils/store';
 inquirer.registerPrompt('maxlength-input', MaxLengthInputPrompt);
 inquirer.registerPrompt('autocomplete', AutoComplete);
 
-// TODO: If commit failed, store message and ask if want to use it next time
 // TODO: saveResponses for getDetails, when done
-// TODO: getDetails
 // TODO: Can pass flag to do a short commit
 // TODO: Ask if we to do description and open editor right after if true
 // TODO: If no staged ask to stage all
