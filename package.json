@@ -44,7 +44,7 @@
     "jsdoc": "3.5.5"
   },
   "dependencies": {
-    "@cajacko/template": "https://github.com/cajacko/template.git#v0.12.0",
+    "@cajacko/template": "https://github.com/cajacko/template.git#v0.13.0",
     "emojic": "^1.1.14",
     "fs-extra": "^7.0.0",
     "fuzzy": "^0.1.3",
