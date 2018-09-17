@@ -4,6 +4,7 @@ import inquirer from 'inquirer';
 import fuzzy from 'fuzzy';
 import emojiChoices from './emojiChoices';
 import setDetails from '../utils/setDetails';
+import confirm from './confirm';
 
 /**
  *
@@ -332,45 +333,31 @@ const getMessage = (
         });
       })
       .then(message =>
-        inquirer
-          .prompt([
-            {
-              type: 'confirm',
-              name: 'shouldCommit',
-              message: `Commit message:\n------\n${message}\n------\n\nDo you want to use this message?`,
-            },
-          ])
-          .then(({ shouldCommit }) => {
-            if (!shouldCommit) return null;
+        confirm(
+          message,
+          `Commit message:\n------\n${message}\n------\n\nDo you want to use this message?`
+        ))
+      .then((message) => {
+        setDetails({
+          storeKey,
+          branch,
+          newTags,
+          referenceKeys,
+          scope: scopeAnswer,
+          relatedTo,
+        });
 
-            setDetails({
-              storeKey,
-              branch,
-              newTags,
-              referenceKeys,
-              scope: scopeAnswer,
-              relatedTo,
-            });
-
-            return message;
-          }));
+        return message;
+      });
   };
 
   if (!failedMessage) return getNewMessage();
 
-  return inquirer
-    .prompt([
-      {
-        name: 'shouldUseFailedMessage',
-        type: 'confirm',
-        message: `There is a previous commit message which failed to be applied:\n------\n${failedMessage}\n------\n\nDo you want to use this message?`,
-      },
-    ])
-    .then(({ shouldUseFailedMessage }) => {
-      if (shouldUseFailedMessage) return failedMessage;
-
-      return getNewMessage();
-    });
+  return confirm(
+    failedMessage,
+    `There is a previous commit message which failed to be applied:\n------\n${failedMessage}\n------\n\nDo you want to use this message?`,
+    getNewMessage
+  );
 };
 
 export default getMessage;

@@ -13,12 +13,11 @@ import { set, remove } from './utils/store';
 inquirer.registerPrompt('maxlength-input', MaxLengthInputPrompt);
 inquirer.registerPrompt('autocomplete', AutoComplete);
 
-// TODO: Final confirm is Yne - e is editor, same it confirming previous commit
 // TODO: Ask if we to do description and open editor right after if true
-// TODO: Reorder all choices based on usage (last used is high, frequently used is high)
 // TODO: "Related to" ordered above "fixes"
-// TODO: Ability to force all commits to run through us
 // TODO: Can enter cutom emoji
+// TODO: Ability to force all commits to run through us
+// TODO: Reorder all choices based on usage (last used is high, frequently used is high)
 // TODO: How to keep related To between commits, especially short ones
 
 git.hasStagedChanges(process.cwd()).then((hasStagedChanges) => {
