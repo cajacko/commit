@@ -21,6 +21,9 @@ git.hasStagedChanges(process.cwd()).then((hasStagedChanges) => {
     throw new Error('Nothing is staged');
   }
 
-  return getMessage().then(message =>
-    git.commit(process.cwd(), message, false));
+  return getMessage().then((message) => {
+    if (!message) return Promise.resolve();
+
+    return git.commit(process.cwd(), message, false);
+  });
 });
