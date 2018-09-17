@@ -11,9 +11,16 @@ import getMessage from './message/getMessage';
 inquirer.registerPrompt('maxlength-input', MaxLengthInputPrompt);
 inquirer.registerPrompt('autocomplete', AutoComplete);
 
-// TODO: If commit failed, store message and ask if want to use it
-// TODO: getMessage
-// TODO: saveResponses for getMessage, when done
-// TODO: ask for message and then commit with the message
+// TODO: If commit failed, store message and ask if want to use it next time
+// TODO: getDetails
+// TODO: saveResponses for getDetails, when done
+// TODO: Show git message and confirm before doing it
 
-getMessage().then(message => git.commit(process.cwd(), message, false));
+git.hasStagedChanges(process.cwd()).then((hasStagedChanges) => {
+  if (!hasStagedChanges) {
+    throw new Error('Nothing is staged');
+  }
+
+  return getMessage().then(message =>
+    git.commit(process.cwd(), message, false));
+});
