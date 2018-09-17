@@ -186,7 +186,7 @@ const getMessage = (
                     Promise.resolve(fuzzy
                       .filter(
                         input || '',
-                        ['Fixes', 'Related To'].concat(lastUsedCustomReferenceKeys.reverse())
+                        ['Related To', 'Fixes'].concat(lastUsedCustomReferenceKeys.reverse())
                       )
                       .map(({ original }) => original)),
                   message:

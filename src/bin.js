@@ -14,7 +14,6 @@ inquirer.registerPrompt('maxlength-input', MaxLengthInputPrompt);
 inquirer.registerPrompt('autocomplete', AutoComplete);
 
 // TODO: Ask if we to do description and open editor right after if true
-// TODO: "Related to" ordered above "fixes"
 // TODO: Can enter cutom emoji
 // TODO: Ability to force all commits to run through us
 // TODO: Reorder all choices based on usage (last used is high, frequently used is high)
