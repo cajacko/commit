@@ -3,21 +3,37 @@
 import inquirer from 'inquirer';
 import fuzzy from 'fuzzy';
 import emojiChoices from './emojiChoices';
+import setDetails from '../utils/setDetails';
 
+/**
+ *
+ */
 const trim = (text) => {
   if (text) return text.trim();
 
   return text;
 };
 
+/**
+ *
+ */
 const getMessage = ({
+  storeKey,
   prevBranchResponses,
   branch,
   lastUsedTags,
   lastUsedCustomReferenceKeys,
   failedMessage,
 }) => {
+  /**
+   *
+   */
   const getNewMessage = () => {
+    const newTags = [];
+    const relatedTo = [];
+    const referenceKeys = [];
+    let scopeAnswer;
+
     const descriptionDefault =
       "# Don't save changes to prevent this file getting adding\n# Why is this change needed?\nPrior to this change, \n\n# How does it address the issue?\nThis change";
 
@@ -62,6 +78,7 @@ const getMessage = ({
         },
       ])
       .then(({ type, scope }) => {
+        scopeAnswer = scope;
         let firstLine = '';
 
         if (type !== 'none') {
@@ -174,7 +191,7 @@ const getMessage = ({
                    *
                    */
                   const promise = () => {
-                    if (key === 'Fixes' || 'Related To') {
+                    if (key === 'Fixes' || key === 'Related To') {
                       return inquirer.prompt([
                         {
                           type: 'autocomplete',
@@ -204,6 +221,7 @@ const getMessage = ({
 
                             if (key === 'Related To') {
                               const lastResponse =
+                                prevBranchResponses.relatedTo &&
                                 prevBranchResponses.relatedTo.length &&
                                 prevBranchResponses.relatedTo[
                                   prevBranchResponses.relatedTo.length - 1
@@ -272,6 +290,25 @@ const getMessage = ({
 
                     refs.forEach(({ key, value }) => {
                       gitMessage = `${gitMessage}\n- ${key}: ${value}`;
+
+                      if (key === 'Related To' && !relatedTo.includes(value)) {
+                        relatedTo.push(value);
+                      }
+
+                      if (
+                        key !== 'Related To' &&
+                        key !== 'Fixes' &&
+                        key !== 'Original Branch' &&
+                        !referenceKeys.includes(key)
+                      ) {
+                        referenceKeys.push(key);
+                      }
+
+                      value.split(' ').forEach((tag) => {
+                        if (tag.startsWith('#') && !newTags.includes(tag)) {
+                          newTags.push(tag);
+                        }
+                      });
                     });
                   }
 
@@ -290,7 +327,20 @@ const getMessage = ({
               message: `Commit message:\n------\n${message}\n------\n\nDo you want to use this message?`,
             },
           ])
-          .then(({ shouldCommit }) => shouldCommit && message));
+          .then(({ shouldCommit }) => {
+            if (!shouldCommit) return null;
+
+            setDetails({
+              storeKey,
+              branch,
+              newTags,
+              referenceKeys,
+              scope: scopeAnswer,
+              relatedTo,
+            });
+
+            return message;
+          }));
   };
 
   if (!failedMessage) return getNewMessage();

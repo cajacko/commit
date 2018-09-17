@@ -24,14 +24,18 @@ const getDetails = () =>
           branch,
           origin,
           // prevBranchResponses: {
-          //   choices: ['bug', 'feat', 'feat'],
           //   scope: ['withHOC', null, 'NewsCards'],
           //   relatedTo: ['#456 #567'],
           // },
-          prevBranchResponses: lodashGet(settings, ['branches', branch], {}),
+          prevBranchResponses: lodashGet(
+            settings,
+            [storeKey, 'branches', branch],
+            {}
+          ),
           // lastUsedCustomReferenceKeys: ['Custom'],
           lastUsedCustomReferenceKeys:
-            lodashGet(settings, ['lastUsedCustomReferenceKeys']) || [],
+            lodashGet(settings, [storeKey, 'lastUsedCustomReferenceKeys']) ||
+            [],
           // lastUsedTags: ['#123', '#234', '#345'],
           lastUsedTags: lodashGet(settings, [storeKey, 'lastUsedTags']) || [],
         };

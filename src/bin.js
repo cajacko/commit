@@ -13,7 +13,6 @@ import { set, remove } from './utils/store';
 inquirer.registerPrompt('maxlength-input', MaxLengthInputPrompt);
 inquirer.registerPrompt('autocomplete', AutoComplete);
 
-// TODO: saveResponses for getDetails, when done
 // TODO: Can pass flag to do a short commit
 // TODO: Ask if we to do description and open editor right after if true
 // TODO: If no staged ask to stage all
@@ -23,10 +22,8 @@ git.hasStagedChanges(process.cwd()).then((hasStagedChanges) => {
     throw new Error('Nothing is staged');
   }
 
-  return getDetails().then((details) => {
-    console.log(details);
-
-    return getMessage(details).then((message) => {
+  return getDetails().then(details =>
+    getMessage(details).then((message) => {
       if (!message) return Promise.resolve();
 
       const { storeKey } = details;
@@ -40,6 +37,5 @@ git.hasStagedChanges(process.cwd()).then((hasStagedChanges) => {
           set([storeKey, 'failedMessage'], message);
           throw e;
         });
-    });
-  });
+    }));
 });
