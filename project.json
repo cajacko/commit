@@ -2,7 +2,7 @@
   "title": "Commit",
   "slug": "@cajacko/commit",
   "version": "0.1.0",
-  "description": "Git Commit CLI with Flexible Templates.",
+  "description": "Personal git commit template for Charlie Jackson",
   "authorName": "Charlie Jackson",
   "authorUrl": "https://charliejackson.com",
   "authorEmail": "contact@charliejackson.com",
@@ -20,5 +20,5 @@
       ]
     }
   },
-  "templateInitVersion": "0.9.0"
+  "templateInitVersion": "0.13.0"
 }
