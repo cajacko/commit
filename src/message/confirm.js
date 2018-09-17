@@ -37,7 +37,7 @@ const confirm = (gitMessage, promptMessage, failCallback) =>
         .prompt([
           {
             name: 'content',
-            type: 'editor',
+            type: 'auto-editor',
             message: 'Edit the current git message',
             default: gitMessage,
           },

@@ -10,10 +10,12 @@ import getMessage from './message/getMessage';
 import getDetails from './utils/getDetails';
 import { set, remove } from './utils/store';
 
+const EditorPrompt = require('./utils/EditorPrompt');
+
 inquirer.registerPrompt('maxlength-input', MaxLengthInputPrompt);
 inquirer.registerPrompt('autocomplete', AutoComplete);
+inquirer.registerPrompt('auto-editor', EditorPrompt);
 
-// TODO: Ask if we to do description and open editor right after if true
 // TODO: Can enter cutom emoji
 // TODO: Ability to force all commits to run through us
 // TODO: Reorder all choices based on usage (last used is high, frequently used is high)
