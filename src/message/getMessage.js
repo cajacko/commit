@@ -290,10 +290,11 @@ const getMessage = (
               inquirer
                 .prompt([
                   {
-                    type: 'list',
-
+                    type: 'autocomplete',
                     name: 'emoji',
-                    choices: ['none'].concat(emojiChoices),
+                    message: 'Prepend an emoji',
+                    source: (answers, input) =>
+                      Promise.resolve(['none'].concat(emojiChoices(input))),
                     filter: (text) => {
                       if (!text || text === 'none') return null;
 
