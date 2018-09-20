@@ -47,7 +47,11 @@ const getNewMessage = (
 
   return refResponse('type', prompts.type)()
     .then(() =>
-      refResponse('scope', prompts.scope)(prevBranchResponses, !responses.type))
+      refResponse('scope', prompts.scope)(
+        prevBranchResponses,
+        !responses.type,
+        !!responses.type
+      ))
     .then(() =>
       refResponse('title', prompts.title)(responses.type, responses.scope))
     .then(() => refResponse('body', prompts.body)(omitBody))

@@ -10,10 +10,11 @@ import trim from '../../utils/trim';
  * @param {Object} prevBranchResponses The previous answers object associated
  * with the current branch
  * @param {Boolean} [omitScope] Whether to skip the scope or not
+ * @param {Boolean} [mustInclude] Whether to validate the scope
  *
  * @return {Promise} Promise that returns the scope to use
  */
-const scope = (prevBranchResponses, omitScope) => {
+const scope = (prevBranchResponses, omitScope, mustInclude) => {
   if (omitScope) return Promise.resolve(null);
 
   const prevScope = prevBranchResponses.scope;
@@ -36,6 +37,15 @@ const scope = (prevBranchResponses, omitScope) => {
         message:
           'What is the scope of this change (e.g. component or file name)?\n-',
         filter: trim,
+        validate: (response) => {
+          if (!mustInclude) return true;
+
+          if (!response || response === '' || !response.length) {
+            return 'You must include a scope';
+          }
+
+          return true;
+        },
       },
     ])
     .then(({ val }) => val);
