@@ -3,6 +3,7 @@
 import * as prompts from './prompts';
 import buildMessage from './buildMessage';
 import persistResponses from './persistResponses';
+import confirmMessage from '../utils/confirmMessage';
 
 /**
  * Ask all the prompts to build up a new message
@@ -10,6 +11,7 @@ import persistResponses from './persistResponses';
  * @param {Options} opts The previous and computed properties of the repo
  * @param {Boolean} omitBody Whether to omit the body prompt
  * @param {Boolean} omitRefs Whether to omit the refs prompt
+ * @param {Function} restart The function to restart the entire process
  *
  * @return {Promise} Promise that resolves with the new message
  */
@@ -64,12 +66,7 @@ const getNewMessage = (
       return buildMessage(title, emoji, body, refs);
     })
     .then(message =>
-      prompts.confirm(
-        message,
-        `Commit message:\n------\n${message}\n------\n\nDo you want to use this message?`,
-        null,
-        restart
-      ))
+      prompts.confirm(message, confirmMessage(message), null, restart))
     .then((message) => {
       if (!message) return null;
 

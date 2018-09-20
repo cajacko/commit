@@ -31,7 +31,7 @@ const buildMessage = (title, emoji, body, refs) => {
 
   gitMessage = gitMessage.replace('\n\n\n', '\n\n');
 
-  return gitMessage;
+  return gitMessage.trim();
 };
 
 export default buildMessage;

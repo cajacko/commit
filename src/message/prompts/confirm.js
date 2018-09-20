@@ -2,6 +2,7 @@
 
 import inquirer from 'inquirer';
 import chalk from 'chalk';
+import confirmMessage from '../../utils/confirmMessage';
 
 /**
  * Confirm a git commit message, resolves with the message if accepted, null if
@@ -54,7 +55,8 @@ const confirm = (gitMessage, promptMessage, failCallback, restartCallback) => {
                 default: gitMessage,
               },
             ])
-            .then(({ content }) => content);
+            .then(({ content }) =>
+              confirm(content, confirmMessage(content), null, restartCallback));
       }
     });
 };

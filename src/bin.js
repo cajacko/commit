@@ -18,7 +18,6 @@ inquirer.registerPrompt('autocomplete', AutoComplete);
 inquirer.registerPrompt('auto-editor', EditorPrompt);
 
 // TODO: Must have a type and scope
-// TODO: confirm again after edit
 // TODO: Prioritise emoji based off what type
 // TODO: Ability to force all commits to run through us
 // TODO: Reorder all choices based on usage (last used is high, frequently used is high)
