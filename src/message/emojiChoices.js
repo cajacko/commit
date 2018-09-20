@@ -21,8 +21,8 @@ const pinnedEmojis = {
   'green heart': 'when fixing the CI build',
   'white heavy check mark': 'when adding tests',
   locked: 'when dealing with security',
-  'up arrow': 'when upgrading dependencies',
-  'down arrow': 'when downgrading dependencies',
+  'up button': 'when upgrading dependencies',
+  'down button': 'when downgrading dependencies',
   wrench: 'when doing a chore/build tasks',
 };
 

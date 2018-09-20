@@ -4,10 +4,13 @@ import uniq from 'lodash/uniq';
 import { set, get } from './store';
 
 /**
+ * Add items to an array in the store, with an optional max amount of items
  *
- * @param {*} location
- * @param {*} newArr
- * @param {*} limit
+ * @param {Array} location The location in the object to get
+ * @param {Array} newArr The new array to concat
+ * @param {Number} [limit] The max amount of items to have in the array
+ *
+ * @return {Promise} Promise that resolves when the new array has been set
  */
 const addToArr = (location, newArr, limit = 20) =>
   (!newArr.length
@@ -22,8 +25,12 @@ const addToArr = (location, newArr, limit = 20) =>
     }));
 
 /**
+ * Set the new responses to the store so we can have better suggestions next
+ * time
  *
- * @param {*} param0
+ * @param {Object} responses The responses to set
+ *
+ * @return {Promise} Promise that resovles when the responses have been set
  */
 const setDetails = ({
   storeKey,

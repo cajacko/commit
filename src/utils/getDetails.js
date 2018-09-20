@@ -5,7 +5,10 @@ import lodashGet from 'lodash/get';
 import { get } from './store';
 
 /**
+ * Get any config details from previous responses related to this repo and
+ * branch, also gets some of the git info and passes it on
  *
+ * @return {Object} The config about this repo and previous responses
  */
 const getDetails = () =>
   git.getRootDir(process.cwd()).then(rootDir =>
@@ -23,20 +26,14 @@ const getDetails = () =>
           rootDir,
           branch,
           origin,
-          // prevBranchResponses: {
-          //   scope: ['withHOC', null, 'NewsCards'],
-          //   relatedTo: ['#456 #567'],
-          // },
           prevBranchResponses: lodashGet(
             settings,
             [storeKey, 'branches', branch],
             {}
           ),
-          // lastUsedCustomReferenceKeys: ['Custom'],
           lastUsedCustomReferenceKeys:
             lodashGet(settings, [storeKey, 'lastUsedCustomReferenceKeys']) ||
             [],
-          // lastUsedTags: ['#123', '#234', '#345'],
           lastUsedTags: lodashGet(settings, [storeKey, 'lastUsedTags']) || [],
         };
       });

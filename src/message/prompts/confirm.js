@@ -2,6 +2,16 @@
 
 import inquirer from 'inquirer';
 
+/**
+ * Confirm a git commit message, resolves with the message if accepted, null if
+ * declined, and let's you edit the message if you choose that option
+ *
+ * @param {String} gitMessage The git message to confirm
+ * @param {String} promptMessage The prompt message to show
+ * @param {Function} failCallback Optional callback for when failed
+ *
+ * @return {Promise} Promise that resolves with the message or null if declined
+ */
 const confirm = (gitMessage, promptMessage, failCallback) =>
   inquirer
     .prompt([
