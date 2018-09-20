@@ -9,10 +9,13 @@ import trim from '../../utils/trim';
  *
  * @param {Object} prevBranchResponses The previous answers object associated
  * with the current branch
+ * @param {Boolean} [omitScope] Whether to skip the scope or not
  *
  * @return {Promise} Promise that returns the scope to use
  */
-const scope = (prevBranchResponses) => {
+const scope = (prevBranchResponses, omitScope) => {
+  if (omitScope) return Promise.resolve(null);
+
   const prevScope = prevBranchResponses.scope;
   let scopeSuggestions = [];
 
