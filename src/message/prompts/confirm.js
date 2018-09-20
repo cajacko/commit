@@ -1,6 +1,7 @@
 // @flow
 
 import inquirer from 'inquirer';
+import chalk from 'chalk';
 
 /**
  * Confirm a git commit message, resolves with the message if accepted, null if
@@ -14,26 +15,33 @@ import inquirer from 'inquirer';
  *
  * @return {Promise} Promise that resolves with the message or null if declined
  */
-const confirm = (gitMessage, promptMessage, failCallback, restartCallback) =>
-  inquirer
+const confirm = (gitMessage, promptMessage, failCallback, restartCallback) => {
+  const choices = {
+    yes: chalk.green('Yes'),
+    no: chalk.red('No'),
+    edit: 'Edit',
+    restart: 'Start Again',
+  };
+
+  return inquirer
     .prompt([
       {
         name: 'confirmed',
         type: 'list',
-        choices: ['Yes', 'No', 'Edit', 'Start Again'],
+        choices: Object.values(choices),
         default: 'Confirm',
         message: promptMessage,
       },
     ])
     .then(({ confirmed }) => {
       switch (confirmed) {
-        case 'Yes':
+        case choices.yes:
           return gitMessage;
 
-        case 'No':
+        case choices.no:
           return failCallback ? failCallback() : null;
 
-        case 'Start Again':
+        case choices.restart:
           return restartCallback ? restartCallback() : null;
 
         default:
@@ -49,5 +57,6 @@ const confirm = (gitMessage, promptMessage, failCallback, restartCallback) =>
             .then(({ content }) => content);
       }
     });
+};
 
 export default confirm;

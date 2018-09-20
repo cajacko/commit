@@ -1,6 +1,7 @@
 // @flow
 
 import inquirer from 'inquirer';
+import chalk from 'chalk';
 import { DESCRIPTION_DEFAULT } from '../../config/options';
 import trim from '../../utils/trim';
 
@@ -14,18 +15,23 @@ import trim from '../../utils/trim';
 const body = (omitBody) => {
   if (omitBody) return Promise.resolve(null);
 
+  const choices = {
+    yes: chalk.green('Yes'),
+    no: chalk.red('No'),
+  };
+
   return inquirer
     .prompt([
       {
         type: 'list',
         name: 'shouldAddBody',
         message: 'Add a description to this commit',
-        choices: ['Yes', 'No'],
-        default: 'Yes',
+        choices: Object.values(choices),
+        default: choices.yes,
       },
     ])
     .then(({ shouldAddBody }) => {
-      if (shouldAddBody === 'No') return null;
+      if (shouldAddBody === choices.no) return null;
 
       return inquirer
         .prompt([
