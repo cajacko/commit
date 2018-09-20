@@ -22,7 +22,7 @@ const buildMessage = (title, emoji, body, refs) => {
   }
 
   if (refs.length) {
-    gitMessage = `${gitMessage}\n\nReferences:`;
+    gitMessage = `${gitMessage}\n\n`;
 
     refs.forEach(({ key, value }) => {
       gitMessage = `${gitMessage}\n- ${key}: ${value}`;
