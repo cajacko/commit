@@ -16,7 +16,7 @@ inquirer.registerPrompt('maxlength-input', MaxLengthInputPrompt);
 inquirer.registerPrompt('autocomplete', AutoComplete);
 inquirer.registerPrompt('auto-editor', EditorPrompt);
 
-// TODO: Restart option at end
+// TODO: Highlight no staged chanegs or no diffs, and Yes/No etc
 // TODO: Must have a type and scope
 // TODO: Prioritise emoji based off what type
 // TODO: Ability to force all commits to run through us
@@ -30,7 +30,9 @@ git.hasStagedChanges(process.cwd()).then((hasStagedChanges) => {
   const omitRefs = omitBody;
 
   /**
+   * Get the commit message and commit if all good
    *
+   * @return {Promise} Promise that resolves when commited or aborted
    */
   const commit = () =>
     getDetails().then(details =>

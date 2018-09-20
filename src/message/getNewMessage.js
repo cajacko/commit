@@ -22,7 +22,8 @@ const getNewMessage = (
     lastUsedCustomReferenceKeys,
   },
   omitBody,
-  omitRefs
+  omitRefs,
+  restart
 ) => {
   const responses = {};
 
@@ -65,7 +66,9 @@ const getNewMessage = (
     .then(message =>
       prompts.confirm(
         message,
-        `Commit message:\n------\n${message}\n------\n\nDo you want to use this message?`
+        `Commit message:\n------\n${message}\n------\n\nDo you want to use this message?`,
+        null,
+        restart
       ))
     .then((message) => {
       if (!message) return null;
