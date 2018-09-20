@@ -35,6 +35,7 @@ const getDetails = () =>
             lodashGet(settings, [storeKey, 'lastUsedCustomReferenceKeys']) ||
             [],
           lastUsedTags: lodashGet(settings, [storeKey, 'lastUsedTags']) || [],
+          failedMessage: lodashGet(settings, [storeKey, 'failedMessage'], null),
         };
       });
     }));
