@@ -17,13 +17,15 @@ const body = (omitBody) => {
   return inquirer
     .prompt([
       {
-        type: 'confirm',
+        type: 'list',
         name: 'shouldAddBody',
         message: 'Add a description to this commit',
+        choices: ['Yes', 'No'],
+        default: 'Yes',
       },
     ])
     .then(({ shouldAddBody }) => {
-      if (!shouldAddBody) return null;
+      if (shouldAddBody === 'No') return null;
 
       return inquirer
         .prompt([

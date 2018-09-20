@@ -16,9 +16,9 @@ inquirer.registerPrompt('maxlength-input', MaxLengthInputPrompt);
 inquirer.registerPrompt('autocomplete', AutoComplete);
 inquirer.registerPrompt('auto-editor', EditorPrompt);
 
-// TODO: select instead of confirm, as do things with arrows more often
+// TODO: Restart option at end
+// TODO: Must have a type and scope
 // TODO: Prioritise emoji based off what type
-// TODO: Must have a type
 // TODO: Ability to force all commits to run through us
 // TODO: Reorder all choices based on usage (last used is high, frequently used is high)
 // TODO: How to keep related To between commits, especially short ones

@@ -17,31 +17,15 @@ const confirm = (gitMessage, promptMessage, failCallback) =>
     .prompt([
       {
         name: 'confirmed',
-        type: 'expand',
-        choices: [
-          {
-            key: 'y',
-            name: 'Confirm',
-            value: true,
-          },
-          {
-            key: 'n',
-            name: 'Decline',
-            value: false,
-          },
-          {
-            key: 'e',
-            name: 'Edit',
-            value: 'edit',
-          },
-        ],
-        default: 0,
+        type: 'list',
+        choices: ['Yes', 'No', 'Edit'],
+        default: 'Confirm',
         message: promptMessage,
       },
     ])
     .then(({ confirmed }) => {
-      if (confirmed === true) return gitMessage;
-      if (confirmed === false) return failCallback ? failCallback() : null;
+      if (confirmed === 'Yes') return gitMessage;
+      if (confirmed === 'No') return failCallback ? failCallback() : null;
 
       return inquirer
         .prompt([
