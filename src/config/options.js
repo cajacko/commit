@@ -1,7 +1,7 @@
 // @flow
 
 // Line lengths taken from https://chris.beams.io/posts/git-commit/
-export const MAX_TITLE_LENGTH = 50;
+export const MAX_TITLE_LENGTH = 72;
 export const MAX_BODY_LINE_LENGTH = 72;
 export const EMOJI_LENGTH_ALLOWANCE = 2;
 
