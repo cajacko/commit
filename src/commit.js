@@ -10,6 +10,7 @@ import chalk from 'chalk';
 import getMessage from './message/getMessage';
 import getDetails from './utils/getDetails';
 import { set, remove } from './utils/store';
+import ensureSetup from './ensureSetup';
 
 const EditorPrompt = require('./utils/EditorPrompt');
 
@@ -24,49 +25,51 @@ const commit = () => {
   inquirer.registerPrompt('autocomplete', AutoComplete);
   inquirer.registerPrompt('auto-editor', EditorPrompt);
 
-  return git.hasStagedChanges(process.cwd()).then((hasStagedChanges) => {
-    const omitBody = process.argv.includes('-s');
-    const omitRefs = omitBody;
+  return ensureSetup()
+    .then(() => git.hasStagedChanges(process.cwd()))
+    .then((hasStagedChanges) => {
+      const omitBody = process.argv.includes('-s');
+      const omitRefs = omitBody;
 
-    /**
-     * Get the commit message and commit if all good
-     *
-     * @return {Promise} Promise that resolves when commited or aborted
-     */
-    const run = () =>
-      getDetails().then(details =>
-        getMessage(details, omitBody, omitRefs).then((message) => {
-          if (!message) return Promise.resolve();
+      /**
+       * Get the commit message and commit if all good
+       *
+       * @return {Promise} Promise that resolves when commited or aborted
+       */
+      const run = () =>
+        getDetails().then(details =>
+          getMessage(details, omitBody, omitRefs).then((message) => {
+            if (!message) return Promise.resolve();
 
-          const { storeKey } = details;
+            const { storeKey } = details;
 
-          return set(['lastCommitMessage'], message)
-            .then(() => git.commit(process.cwd(), message, false))
-            .then(() => {
-              remove([storeKey, 'failedMessage']);
-            })
-            .catch((e) => {
-              set([storeKey, 'failedMessage'], message);
-              throw e;
-            });
-        }));
+            return set(['lastCommitMessage'], message)
+              .then(() => git.commit(process.cwd(), message, false))
+              .then(() => {
+                remove([storeKey, 'failedMessage']);
+              })
+              .catch((e) => {
+                set([storeKey, 'failedMessage'], message);
+                throw e;
+              });
+          }));
 
-    if (hasStagedChanges) return run();
+      if (hasStagedChanges) return run();
 
-    return (
-      git
-        .hasUnstagedChanges(process.cwd())
-        .then((hasUnstagedChanges) => {
-          if (!hasUnstagedChanges) {
-            throw new Error(chalk.red('There are no changes to commit'));
-          }
+      return (
+        git
+          .hasUnstagedChanges(process.cwd())
+          .then((hasUnstagedChanges) => {
+            if (!hasUnstagedChanges) {
+              throw new Error(chalk.red('There are no changes to commit'));
+            }
 
-          return git.stageAll().then(run);
-        })
-        // eslint-disable-next-line no-console
-        .catch(console.error)
-    );
-  });
+            return git.stageAll().then(run);
+          })
+          // eslint-disable-next-line no-console
+          .catch(console.error)
+      );
+    });
 };
 
 export default commit;
