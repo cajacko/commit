@@ -6,7 +6,6 @@
     "commit": "dist/bin.js"
   },
   "scripts": {
-    "commit": "git-cz",
     "start": "template start",
     "init": "template init",
     "test": "template test",

@@ -36,13 +36,17 @@ const error = new Error(chalk.red('\nCommit failed.\nCommits are only allowed vi
  *
  * @param {Object} settings The cli settings
  * @param {String} storeKey The store key for the repo
+ * @param {Boolean} [useUserSettings] Whether to use the user settings or not
  *
  * @return {Boolean} Whether we should validate or not
  */
-const getShouldValidate = (settings, storeKey) => {
+const getShouldValidate = (settings, storeKey, useUserSettings) => {
   // -u stands for "use user settings". If this doesn't exist we always validate
   // Otherwise we see what repo or global level settings the user has set
-  if (!process.argv.includes('-u')) return true;
+  if (useUserSettings === true) return true;
+  if (useUserSettings === undefined && !process.argv.includes('-u')) {
+    return true;
+  }
 
   const repoShouldValidate = lodashGet(settings, [storeKey, 'shouldValidate']);
 
@@ -59,14 +63,18 @@ const getShouldValidate = (settings, storeKey) => {
  * Validate that the current commit message in .git dir matches the one created
  * via the cli. If it doesn't match then someone is commiting not from the cli
  *
+ * @param {Boolean} [useUserSettings] Whether to use the user settings or not
+ *
  * @return {Promise} Promise that resolves if the commit is from the cli and
  * fails if not
  */
-const validateCommit = () =>
+const validateCommit = useUserSettings =>
   Promise.all([get(), getStoreKey()]).then(([storeSettings, storeKey]) => {
     const settings = storeSettings || {};
 
-    if (!getShouldValidate(settings, storeKey)) return Promise.resolve();
+    if (!getShouldValidate(settings, storeKey, useUserSettings)) {
+      return Promise.resolve();
+    }
 
     return git.getRootDir(process.cwd()).then((gitDir) => {
       const lastCommitMessage = lodashGet(settings, ['lastCommitMessage']);
