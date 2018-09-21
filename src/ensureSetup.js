@@ -68,19 +68,10 @@ const ensureSetup = forcePrompt =>
       return settingPrompt(
         ['globalShouldValidate'],
         'Setup - Set global default for "shouldValidate"'
-      )()
-        .then(settingPrompt(
-          ['globalSkipValidateOnError'],
-          'Setup - Set global default for "skipValidateOnError"'
-        ))
-        .then(settingPrompt(
-          [storeKey, 'shouldValidate'],
-          'Setup - Set "shouldValidate" for this repo'
-        ))
-        .then(settingPrompt(
-          [storeKey, 'skipValidateOnError'],
-          'Setup - Set "skipValidateOnError" for this repo'
-        ));
+      )().then(settingPrompt(
+        [storeKey, 'shouldValidate'],
+        'Setup - Set "shouldValidate" for this repo'
+      ));
     }));
 
 export default ensureSetup;

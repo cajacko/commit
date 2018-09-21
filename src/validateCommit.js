@@ -52,44 +52,16 @@ const getShouldValidate = (settings, storeKey) => {
 };
 
 /**
- * Figure out whether we should skip throwing an error if something unexpected
- * happens
- *
- * @param {Object} settings The cli settings
- * @param {String} storeKey The store key for the repo
- *
- * @return {Boolean} Whether we should skip throwing an error if something
- * unexpected happens
- */
-const getSkipValidateOnError = (settings, storeKey) => {
-  const repoSkipValidateOnError = lodashGet(settings, [
-    storeKey,
-    'skipValidateOnError',
-  ]);
-
-  if (typeof repoSkipValidateOnError === 'boolean') {
-    return repoSkipValidateOnError;
-  } else if (typeof settings.globalSkipValidateOnError === 'boolean') {
-    return settings.globalSkipValidateOnError;
-  }
-
-  return true;
-};
-
-/**
  * Validate that the current commit message in .git dir matches the one created
  * via the cli. If it doesn't match then someone is commiting not from the cli
  *
  * @return {Promise} Promise that resolves if the commit is from the cli and
  * fails if not
  */
-const validateCommit = () => {
-  let skipValidateOnError = true;
-
-  return Promise.all([get(), getStoreKey()])
+const validateCommit = () =>
+  Promise.all([get(), getStoreKey()])
     .then(([storeSettings, storeKey]) => {
       const settings = storeSettings || {};
-      skipValidateOnError = getSkipValidateOnError(settings, storeKey);
 
       if (!getShouldValidate(settings, storeKey)) return Promise.resolve();
 
@@ -111,14 +83,8 @@ const validateCommit = () => {
           });
       });
     })
-    .catch((e) => {
-      if (skipValidateOnError) return null;
-
-      throw e;
-    })
     .then((e) => {
       if (e) throw e;
     });
-};
 
 export default validateCommit;
