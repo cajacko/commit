@@ -40,6 +40,10 @@ const error = new Error(chalk.red('\nCommit failed.\nCommits are only allowed vi
  * @return {Boolean} Whether we should validate or not
  */
 const getShouldValidate = (settings, storeKey) => {
+  // -u stands for "use user settings". If this doesn't exist we always validate
+  // Otherwise we see what repo or global level settings the user has set
+  if (!process.argv.includes('-u')) return true;
+
   const repoShouldValidate = lodashGet(settings, [storeKey, 'shouldValidate']);
 
   if (typeof repoShouldValidate === 'boolean') {
@@ -59,32 +63,28 @@ const getShouldValidate = (settings, storeKey) => {
  * fails if not
  */
 const validateCommit = () =>
-  Promise.all([get(), getStoreKey()])
-    .then(([storeSettings, storeKey]) => {
-      const settings = storeSettings || {};
+  Promise.all([get(), getStoreKey()]).then(([storeSettings, storeKey]) => {
+    const settings = storeSettings || {};
 
-      if (!getShouldValidate(settings, storeKey)) return Promise.resolve();
+    if (!getShouldValidate(settings, storeKey)) return Promise.resolve();
 
-      return git.getRootDir(process.cwd()).then((gitDir) => {
-        const lastCommitMessage = lodashGet(settings, ['lastCommitMessage']);
+    return git.getRootDir(process.cwd()).then((gitDir) => {
+      const lastCommitMessage = lodashGet(settings, ['lastCommitMessage']);
 
-        if (!lastCommitMessage) throw error;
+      if (!lastCommitMessage) throw error;
 
-        return readFile(join(gitDir, '.git/COMMIT_EDITMSG'))
-          .catch(() => {
-            throw new Error(chalk.red('\nCould not get your current commit message.\nPlease ensure "commit --validate-commit is running on the "commit-msg" hook.\nOtherwise we can\'t get it'));
-          })
-          .then((currentMsg) => {
-            if (!areMessagesEqual(lastCommitMessage, currentMsg)) {
-              return error;
-            }
+      return readFile(join(gitDir, '.git/COMMIT_EDITMSG'))
+        .catch(() => {
+          throw new Error(chalk.red('\nCould not get your current commit message.\nPlease ensure "commit --validate-commit is running on the "commit-msg" hook.\nOtherwise we can\'t get it'));
+        })
+        .then((currentMsg) => {
+          if (!areMessagesEqual(lastCommitMessage, currentMsg)) {
+            throw error;
+          }
 
-            return null;
-          });
-      });
-    })
-    .then((e) => {
-      if (e) throw e;
+          return null;
+        });
     });
+  });
 
 export default validateCommit;
