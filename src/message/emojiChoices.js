@@ -7,6 +7,7 @@ import fuzzy from 'fuzzy';
 const englishAnnotations = combinedAnnotationsForLanguage('en');
 
 const pinnedEmojis = {
+  sparkles: 'when adding a new feature',
   'artist palette': 'when improving the format/structure of the code',
   horse: 'when improving performance',
   'non-potable water': 'when plugging memory leaks',
