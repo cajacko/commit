@@ -43,7 +43,7 @@
     "jsdoc": "3.5.5"
   },
   "dependencies": {
-    "@cajacko/template": "https://github.com/cajacko/template.git#v0.13.0",
+    "@cajacko/template": "0.20.0",
     "chalk": "^2.4.1",
     "fs-extra": "^7.0.0",
     "fuzzy": "^0.1.3",
