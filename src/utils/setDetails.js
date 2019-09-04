@@ -1,6 +1,7 @@
 // @flow
 
 import uniq from 'lodash/uniq';
+import * as defaults from '../config/gitDefaults';
 import { set, get } from './store';
 
 /**
@@ -33,18 +34,18 @@ const addToArr = (location, newArr, limit = 20) =>
  * @return {Promise} Promise that resovles when the responses have been set
  */
 const setDetails = ({
-  storeKey,
-  branch,
-  newTags,
-  referenceKeys,
-  scope,
-  relatedTo,
-}) =>
-  addToArr([storeKey, 'lastUsedTags'], newTags)
+  newTags, scope, relatedTo, referenceKeys, ...opts
+}) => {
+  // Using a default here for global suggestions
+  const storeKey = opts.storeKey || defaults.storeKey;
+  const branch = opts.branch || defaults.branch;
+
+  return addToArr([storeKey, 'lastUsedTags'], newTags)
     .then(() =>
       addToArr([storeKey, 'lastUsedCustomReferenceKeys'], referenceKeys))
     .then(() => scope && addToArr([storeKey, 'branches', branch, 'scope'], [scope]))
     .then(() =>
       addToArr([storeKey, 'branches', branch, 'relatedTo'], relatedTo));
+};
 
 export default setDetails;

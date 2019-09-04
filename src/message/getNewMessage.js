@@ -17,7 +17,8 @@ import confirmMessage from '../utils/confirmMessage';
  */
 const getNewMessage = (
   {
-    storeKey,
+    // Using a default here for global suggestions
+    // storeKey,
     prevBranchResponses,
     branch,
     lastUsedTags,
@@ -75,7 +76,9 @@ const getNewMessage = (
     .then((message) => {
       if (!message) return null;
 
-      persistResponses(storeKey, branch, responses);
+      // Do not pass a storeKey or branch as we want to get suggestions globally
+      // now
+      persistResponses(undefined, undefined, responses);
 
       return message;
     });

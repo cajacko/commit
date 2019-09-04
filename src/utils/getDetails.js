@@ -2,8 +2,9 @@
 
 import { git } from '@cajacko/template';
 import lodashGet from 'lodash/get';
+import * as defaults from '../config/gitDefaults';
 import { get } from './store';
-import getStoreKey from './getStoreKey';
+// import getStoreKey from './getStoreKey';
 
 /**
  * Get any config details from previous responses related to this repo and
@@ -14,12 +15,16 @@ import getStoreKey from './getStoreKey';
 const getDetails = () =>
   git.getRootDir(process.cwd()).then(rootDir =>
     Promise.all([
-      getStoreKey(),
+      // Using a default here for global suggestions
+      // getStoreKey(),
       git.getOrigin().catch(() => null),
-      git.getCurrentBranch(),
-    ]).then(([storeKey, origin, branch]) =>
+      // Using a default here for global suggestions
+      // git.getCurrentBranch(),
+    ]).then(([origin]) =>
       get().then((storeSettings) => {
         const settings = storeSettings || {};
+        // Using a default here for global suggestions
+        const { storeKey, branch } = defaults;
 
         return {
           storeKey,
