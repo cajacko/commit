@@ -16,8 +16,8 @@ const body = (omitBody) => {
   if (omitBody) return Promise.resolve(null);
 
   const choices = {
-    yes: chalk.green('Yes'),
     no: chalk.red('No'),
+    yes: chalk.green('Yes'),
   };
 
   return inquirer
@@ -27,7 +27,7 @@ const body = (omitBody) => {
         name: 'shouldAddBody',
         message: 'Add a description to this commit',
         choices: Object.values(choices),
-        default: choices.yes,
+        default: choices.no,
       },
     ])
     .then(({ shouldAddBody }) => {
