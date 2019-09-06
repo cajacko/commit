@@ -1,6 +1,6 @@
 {
   "name": "@cajacko/commit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Installs Charlie Jackson's commitizen template globally",
   "scripts": {
     "postinstall": "npm install -g commitizen && node postinstall.js"
