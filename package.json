@@ -1,9 +1,13 @@
 {
   "name": "@cajacko/commit",
-  "version": "0.6.0",
-  "description": "Git Commit CLI with Flexible Templates.",
-  "bin": {
-    "commit": "bin.js"
+  "version": "1.0.0",
+  "description": "Installs Charlie Jackson's commitizen template globally",
+  "scripts": {
+    "postinstall": "npm install -g commitizen && node postinstall.js"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@cajacko/cz-conventional-changelog": "*",
+    "fs-extra": "^8.1.0"
+  }
 }
